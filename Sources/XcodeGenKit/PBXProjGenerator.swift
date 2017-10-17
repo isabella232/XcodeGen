@@ -229,7 +229,8 @@ public class PBXProjGenerator {
 
         var dependencies: [String] = []
         var targetFrameworkBuildFiles: [String] = []
-        var copyFiles: [String] = []
+        var copyFrameworksReferences: [String] = []
+        var copyResourcesReferences: [String] = []
         var copyWatchReferences: [String] = []
         var extensions: [String] = []
 
@@ -268,10 +269,12 @@ public class PBXProjGenerator {
                     if dependencyTarget.type.isExtension {
                         // embed app extension
                         extensions.append(embedFile.reference)
+                    } else if dependencyTarget.type.isFramework {
+                        copyFrameworksReferences.append(embedFile.reference)
                     } else if dependencyTarget.type.isApp && dependencyTarget.platform == .watchOS {
                         copyWatchReferences.append(embedFile.reference)
                     } else {
-                        copyFiles.append(embedFile.reference)
+                        copyResourcesReferences.append(embedFile.reference)
                     }
                 }
 
@@ -290,7 +293,7 @@ public class PBXProjGenerator {
                 if embed {
                     let embedFile = PBXBuildFile(reference: generateUUID(PBXBuildFile.self, fileReference + target.name), fileRef: fileReference, settings: dependency.buildSettings)
                     addObject(embedFile)
-                    copyFiles.append(embedFile.reference)
+                    copyFrameworksReferences.append(embedFile.reference)
                 }
             case .carthage:
                 if carthageFrameworksByPlatform[target.platform.carthageDirectoryName] == nil {
@@ -311,7 +314,7 @@ public class PBXProjGenerator {
                 if target.platform == .macOS && target.type.isApp {
                     let embedFile = PBXBuildFile(reference: generateUUID(PBXBuildFile.self, fileReference + target.name), fileRef: fileReference, settings: dependency.buildSettings)
                     addObject(embedFile)
-                    copyFiles.append(embedFile.reference)
+                    copyFrameworksReferences.append(embedFile.reference)
                 }
             }
         }
@@ -355,7 +358,7 @@ public class PBXProjGenerator {
         addObject(sourcesBuildPhase)
         buildPhases.append(sourcesBuildPhase.reference)
 
-        let resourcesBuildPhase = PBXResourcesBuildPhase(reference: generateUUID(PBXResourcesBuildPhase.self, target.name), files: getBuildFilesForPhase(.resources))
+        let resourcesBuildPhase = PBXResourcesBuildPhase(reference: generateUUID(PBXResourcesBuildPhase.self, target.name), files: getBuildFilesForPhase(.resources) + copyResourcesReferences)
         addObject(resourcesBuildPhase)
         buildPhases.append(resourcesBuildPhase.reference)
 
@@ -386,13 +389,13 @@ public class PBXProjGenerator {
             buildPhases.append(copyFilesPhase.reference)
         }
 
-        if !copyFiles.isEmpty {
+        if !copyFrameworksReferences.isEmpty {
 
             let copyFilesPhase = PBXCopyFilesBuildPhase(
                 reference: generateUUID(PBXCopyFilesBuildPhase.self, "embed frameworks" + target.name),
                 dstPath: "",
                 dstSubfolderSpec: .frameworks,
-                files: copyFiles)
+                files: copyFrameworksReferences)
 
             addObject(copyFilesPhase)
             buildPhases.append(copyFilesPhase.reference)
