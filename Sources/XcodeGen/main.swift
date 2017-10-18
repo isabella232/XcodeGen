@@ -15,7 +15,11 @@ import ProjectSpec
 import JSONUtilities
 import Rainbow
 
-func generate(spec: String, project: String) {
+func generate(spec: String, project: String, printVersion: Bool) {
+    if printVersion {
+        print("1.2.4")
+        return
+    }
 
     let specPath = Path(spec).normalize()
     let projectPath = Path(project).normalize()
@@ -51,5 +55,6 @@ func generate(spec: String, project: String) {
 command(
     Option<String>("spec", "project.yml", flag: "s", description: "The path to the spec file"),
     Option<String>("project", "", flag: "p", description: "The path to the folder where the project should be generated"),
+    Flag("version", flag: "v", description: "The current XcodeGen version"),
     generate)
     .run()
