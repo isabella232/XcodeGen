@@ -18,13 +18,6 @@ extension ProjectSpec {
     public func getProjectBuildSettings(config: Config) -> BuildSettings {
 
         var buildSettings: BuildSettings = [:]
-        buildSettings += SettingsPresetFile.base.getBuildSettings()
-
-        if let type = config.type {
-            buildSettings += SettingsPresetFile.config(type).getBuildSettings()
-        }
-
-        buildSettings += getBuildSettings(settings: settings, config: config)
 
         return buildSettings
     }
@@ -32,28 +25,11 @@ extension ProjectSpec {
     public func getTargetBuildSettings(target: Target, config: Config) -> BuildSettings {
         var buildSettings = BuildSettings()
 
-        buildSettings += SettingsPresetFile.platform(target.platform).getBuildSettings()
-        buildSettings += SettingsPresetFile.product(target.type).getBuildSettings()
-        buildSettings += SettingsPresetFile.productPlatform(target.type, target.platform).getBuildSettings()
-        buildSettings += getBuildSettings(settings: target.settings, config: config)
-
         return buildSettings
     }
 
     public func getBuildSettings(settings: Settings, config: Config) -> BuildSettings {
         var buildSettings: BuildSettings = [:]
-
-        for group in settings.groups {
-            if let settings = settingGroups[group] {
-                buildSettings += getBuildSettings(settings: settings, config: config)
-            }
-        }
-
-        buildSettings += settings.buildSettings
-
-        if let configSettings = settings.configSettings[config.name] {
-            buildSettings += getBuildSettings(settings: configSettings, config: config)
-        }
 
         return buildSettings
     }
@@ -89,32 +65,6 @@ private var buildSettingFiles: [String: BuildSettings] = [:]
 extension SettingsPresetFile {
 
     public func getBuildSettings() -> BuildSettings? {
-        if let group = buildSettingFiles[path] {
-            return group
-        }
-        let relativePath = "SettingPresets/\(path).yml"
-        let possibleSettingsPaths: [Path] = [
-            Path(relativePath),
-            Path(Bundle.main.bundlePath) + relativePath,
-            Path(Bundle.main.bundlePath) + "../share/xcodegen/\(relativePath)",
-            Path(#file).parent().parent().parent() + relativePath,
-        ]
-
-        guard let settingsPath = possibleSettingsPaths.first(where: { $0.exists }) else {
-            switch self {
-            case .base, .config, .platform:
-                print("No \"\(name)\" settings found")
-            case .product, .productPlatform:
-                break
-            }
-            return nil
-        }
-
-        guard let buildSettings = try? loadYamlDictionary(path: settingsPath) else {
-            print("Error parsing \"\(name)\" settings")
-            return nil
-        }
-        buildSettingFiles[path] = buildSettings
-        return buildSettings
+        return nil
     }
 }
