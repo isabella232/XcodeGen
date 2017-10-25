@@ -17,7 +17,7 @@ import Rainbow
 
 func generate(spec: String, project: String, printVersion: Bool) {
     if printVersion {
-        print("1.2.4")
+        print("1.2.4.1")
         return
     }
 
