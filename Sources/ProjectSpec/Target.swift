@@ -205,6 +205,7 @@ public struct Dependency: Equatable {
     public var embed: Bool?
     public var codeSign: Bool = true
     public var removeHeaders: Bool = true
+    public var link: Bool = true
 
     public init(type: DependencyType, reference: String, embed: Bool? = nil) {
         self.type = type
@@ -223,7 +224,8 @@ public struct Dependency: Equatable {
             lhs.type == rhs.type &&
             lhs.codeSign == rhs.codeSign &&
             lhs.removeHeaders == rhs.removeHeaders &&
-            lhs.embed == rhs.embed
+            lhs.embed == rhs.embed &&
+            lhs.link == rhs.link
     }
 
     public var buildSettings: [String: Any] {
@@ -256,6 +258,9 @@ extension Dependency: JSONObjectConvertible {
 
         embed = jsonDictionary.json(atKeyPath: "embed")
 
+        if let bool: Bool = jsonDictionary.json(atKeyPath: "link") {
+            link = bool
+        }
         if let bool: Bool = jsonDictionary.json(atKeyPath: "codeSign") {
             codeSign = bool
         }
