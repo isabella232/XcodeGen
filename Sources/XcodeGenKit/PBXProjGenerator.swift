@@ -682,6 +682,7 @@ public class PBXProjGenerator {
     }
 
     func getAllCarthageDependencies(target: Target, visitedTargets: [String: Bool] = [:]) -> [Dependency] {
+        return []
 
         // this is used to resolve cyclical target dependencies
         var visitedTargets = visitedTargets
